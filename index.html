@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090a12">
+<title>Interactive Lamp Login</title>
+<style>
+:root{--bg:#090a12;--panel:#11131f;--line:#292c3e;--purple:#a78bfa;--text:#f5f3ff;--muted:#9a9bb0}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 18%,#202039 0%,#10111c 38%,#080910 78%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;display:grid;place-items:center;padding:28px;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(to bottom,black,transparent 80%)}
+.shell{width:min(100%,440px);position:relative;z-index:1}
+.brand{display:flex;justify-content:center;align-items:center;gap:9px;margin-bottom:14px;color:#c8b9ff;font-size:12px;letter-spacing:.22em;text-transform:uppercase}
+.brand-mark{width:7px;height:7px;border-radius:50%;background:var(--purple);box-shadow:0 0 14px var(--purple)}
+.lamp-area{height:235px;position:relative;display:flex;justify-content:center;align-items:flex-start;margin-bottom:-6px}
+.glow{position:absolute;top:70px;width:230px;height:145px;background:#b69cff;filter:blur(70px);opacity:.09;transition:opacity .4s}
+.lamp{position:relative;width:180px;height:215px;display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 15px 22px #0009)}
+.cord{width:3px;height:38px;background:linear-gradient(90deg,#555,#b7a9d8,#555);border-radius:4px}
+.cap{width:66px;height:13px;background:linear-gradient(90deg,#49465e,#b8a9d7,#514b68);border-radius:8px 8px 3px 3px}
+.shade{width:154px;height:86px;position:relative;background:linear-gradient(110deg,#554e6e,#b3a4d2 45%,#5d5675);clip-path:polygon(30% 0,70% 0,100% 100%,0 100%);border-radius:10px;transition:filter .3s}
+.shade:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#ffffff20,transparent 40%,#0003)}
+.bulb{width:28px;height:23px;background:#ffe7a0;border-radius:50% 50% 42% 42%;margin-top:-1px;opacity:.25;filter:blur(1px);transition:all .35s}
+.base{width:58px;height:9px;background:linear-gradient(90deg,#4b4660,#b7a9d6,#4b4660);border-radius:0 0 8px 8px}
+.pull{position:absolute;top:130px;right:44px;width:2px;height:58px;background:#a9a0ba;transform-origin:top;transition:transform .25s;cursor:pointer}
+.pull:after{content:"";position:absolute;bottom:-7px;left:-5px;width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,#eee2ff,#766a91);box-shadow:0 2px 8px #0008}
+body.lit .glow{opacity:.42}
+body.lit .bulb{opacity:1;box-shadow:0 0 24px 12px #ffd77c99}
+body.lit .shade{filter:brightness(1.35) drop-shadow(0 0 20px #f5d28c55)}
+body.lit .pull{transform:rotate(-15deg)}
+.card{background:linear-gradient(145deg,#171927ed,#10121ded);border:1px solid #ffffff16;border-radius:24px;padding:30px;box-shadow:0 25px 80px #0008,inset 0 1px #ffffff0c;backdrop-filter:blur(16px)}
+h1{font-size:28px;letter-spacing:-.04em;text-align:center;margin:0 0 8px}
+.sub{text-align:center;color:var(--muted);font-size:13px;line-height:1.6;margin:0 0 25px}
+.field{margin:0 0 16px}
+label{display:block;font-size:12px;color:#c9c7d8;margin:0 0 8px}
+.input-wrap{position:relative}
+input{width:100%;height:49px;border:1px solid var(--line);border-radius:12px;background:#0b0d17;color:white;padding:0 15px;font-size:14px;outline:none;transition:border .2s,box-shadow .2s}
+input:focus{border-color:#9a83e9;box-shadow:0 0 0 3px #9a83e922}
+input::placeholder{color:#686a7e}
+.password{padding-right:54px}
+.show{position:absolute;right:8px;top:8px;height:33px;padding:0 10px;border:0;border-radius:8px;background:#222438;color:#c7b8ff;font-size:11px;cursor:pointer}
+.meta{display:flex;justify-content:space-between;align-items:center;margin:3px 0 20px;font-size:12px;color:var(--muted)}
+.meta a,.signup a{color:#c3afff;text-decoration:none}
+.remember{display:flex;align-items:center;gap:7px}
+.remember input{width:14px;height:14px;accent-color:#9d83f2}
+.cta{width:100%;height:51px;border:0;border-radius:13px;background:linear-gradient(100deg,#9278e9,#b29cfb);color:#171226;font-weight:750;font-size:14px;letter-spacing:.02em;cursor:pointer;box-shadow:0 9px 25px #9278e933;transition:transform .2s,filter .2s}
+.cta:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.cta:active{transform:translateY(0)}
+.message{min-height:19px;text-align:center;color:#c7b8ff;font-size:12px;margin:12px 0 0}
+.signup{text-align:center;color:var(--muted);font-size:12px;margin:20px 0 0}
+.hint{text-align:center;color:#696b80;font-size:10px;letter-spacing:.04em;margin-top:17px}
+@media(max-width:480px){body{padding:20px}.card{padding:25px 21px}h1{font-size:25px}.lamp-area{height:220px}.pull{right:calc(50% - 47px)}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="brand"><span class="brand-mark"></span> NIGHTLIGHT ACCESS</div>
+  <section class="lamp-area" aria-label="Interactive lamp">
+    <div class="glow"></div>
+    <div class="lamp" aria-hidden="true">
+      <div class="cord"></div><div class="cap"></div><div class="shade"></div><div class="bulb"></div><div class="base"></div>
+    </div>
+    <button class="pull" id="pull" aria-label="Toggle lamp light" title="টান দিয়ে আলো জ্বালান"></button>
+  </section>
+  <section class="card">
+    <h1>Welcome back</h1>
+    <p class="sub">Sign in to continue to your account.<br>একটু আলো জ্বালিয়ে শুরু করা যাক।</p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="email">Email address</label>
+        <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <input class="password" id="password" type="password" placeholder="Enter your password" autocomplete="current-password" minlength="4" required>
+          <button class="show" type="button" id="show">SHOW</button>
+        </div>
+      </div>
+      <div class="meta">
+        <label class="remember"><input type="checkbox" id="remember"> Remember me</label>
+        <a href="#" id="forgot">Forgot password?</a>
+      </div>
+      <button class="cta" type="submit" id="submit">Continue&nbsp; →</button>
+      <p class="message" id="message" role="status"></p>
+    </form>
+    <p class="signup">Don't have an account? <a href="#" id="signup">Create one</a></p>
+  </section>
+  <p class="hint">TAP THE LAMP PULL TO SWITCH THE LIGHT</p>
+</main>
+<script>
+const pull=document.getElementById('pull');
+function toggleLamp(){document.body.classList.toggle('lit')}
+pull.addEventListener('click',toggleLamp);
+document.querySelector('.lamp').addEventListener('click',toggleLamp);
+const password=document.getElementById('password');
+document.getElementById('show').addEventListener('click',e=>{
+  const visible=password.type==='password';password.type=visible?'text':'password';e.currentTarget.textContent=visible?'HIDE':'SHOW';
+});
+document.getElementById('loginForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const email=document.getElementById('email').value.trim();
+  document.getElementById('message').textContent=`Demo form ready for ${email}. Connect a login service to enable real sign-in.`;
+});
+document.getElementById('forgot').addEventListener('click',e=>{e.preventDefault();document.getElementById('message').textContent='Password reset needs to be connected to your account service.'});
+document.getElementById('signup').addEventListener('click',e=>{e.preventDefault();document.getElementById('message').textContent='Sign-up page can be added next.'});
+</script>
+</body>
+</html>
